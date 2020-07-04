@@ -25,6 +25,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.enixlin.utils.NetService;
@@ -89,6 +91,7 @@ public class Main {
 		Map<String, String> postParams = new LinkedHashMap<>();
 		// 请求返回结果
 		String result = "";
+		String LTPAToken="";
 
 		// 对密码进行MD5加密,使用jdk里的scriptEngine运行md5.js里的hex_md5函数
 		// document.all.pwd.value=hex_md5( pwdValue );
@@ -114,7 +117,7 @@ public class Main {
 		 * 审核输入的验证码
 		 * 
 		 */
-		requestUrl = "http://zwfw.safe.gov.cn/asone/jsp/checkCode.jsp";
+		requestUrl = "http://asone.safe/asone/jsp/checkCode.jsp";
 		postParams.clear();
 		postParams.put("loginType", "");
 		postParams.put("user_radio", "2");
@@ -125,12 +128,12 @@ public class Main {
 		postParams.put("pwd_f", "");
 		postParams.put("check", verifyCode);
 		result = ns.HttpPost(requestUrl, postParams, "utf-8");
-//		System.out.println("checkCode return result is:" + result);
+		//System.out.println("checkCode return result is:" + result);
 		
 		//从返回的请求响应html中取得加密的验证码
 		int start = result.indexOf("name=\"safeValidateCode\" value=\"")+31 ;
 		String encrytVerifyCode = result.substring(start, start + 32);
-		System.out.println(encrytVerifyCode);
+		//System.out.println(encrytVerifyCode);
 		
 		/*
 		 * 用户登录 请求地址：http://zwfw.safe.gov.cn/asone/servlet/UniLoginServlet 登录使用POST方式
@@ -139,7 +142,7 @@ public class Main {
 		 * safeValidateCode: 340ed3cb761fd8ca6146544e8bff0302 user_radio: 2 loginType:
 		 * biztype: null
 		 */
-		requestUrl = "http://zwfw.safe.gov.cn/asone/servlet/UniLoginServlet";
+		requestUrl = "http://asone.safe/asone/servlet/UniLoginServlet";
 		postParams.clear();
 		postParams.put("orgCode", structCode);
 		postParams.put("userCode", name);
@@ -151,7 +154,26 @@ public class Main {
 		postParams.put("loginType", "");
 		postParams.put("biztype", "null");
 		result = ns.HttpPost(requestUrl, postParams, "utf-8");
+		Header[] headers=ns.getHeaders();
+		String str=headers[0].toString();
+		LTPAToken=str.substring(22,str.length());
+		System.out.println(LTPAToken);
+		
+		
+		requestUrl ="http://asone.safe/asone/servlet/SSOServer?falseflag=ClientNotLogin&userCode=&orgCode=&orgType=&password=&task=doauthenticate&callbackUrl=http%3A%2F%2Fasone.safe%3A80%2FBizforBankWeb%2Fservlet%2FcustomerSearch%3Fcurrent_appCode%3DBZBO%26asone_addr%3Dasone.safe%253A80%26userType%3D";
+		result = ns.HttpGet(requestUrl);
+	CloseableHttpResponse r=ns.getResponse();
+	
 		System.out.println(result);
+		
+		
+
+		
+		//请求单位基本情况表
+//		requestUrl ="http://asone.safe/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken="+LTPAToken;
+//		result = ns.HttpGet(requestUrl);
+//		System.out.println(LTPAToken);
+//		System.out.println(result);
 
 	}
 
@@ -160,11 +182,11 @@ public class Main {
 	 */
 	public void refreshVerifyImage() {
 		// 先请求登录页面，里面有一个IMage 的src
-		String html = this.ns.HttpGet("http://zwfw.safe.gov.cn/asone/WelcomeServlet?code=90000&flag=false");
+		String html = this.ns.HttpGet("http://asone.safe/asone/");
 
 		int start = html.indexOf("/asone/jsp/code.jsp") + 28;
 		String refreshCode = html.substring(start, start + 13);
-		String url = "http://zwfw.safe.gov.cn/asone/jsp/code.jsp?refresh=" + refreshCode;
+		String url = "http://asone.safe/asone/jsp/code.jsp?refresh=" + refreshCode;
 		this.ns.downloadPicture(url, "./", "verifyCode.png");
 		Icon icon = null;
 		try {
@@ -196,9 +218,9 @@ public class Main {
 //				String password = new String(pwd.getPassword());
 //				String struct = structCode.getText();
 				String verify = verifyCode.getText();
-				String name = "billluo1";
-				String password = "123456Aa";
-				String struct = "075093053";
+				String name = "luojing";
+				String password = "Aa6328910";
+				String struct = "440700851401";
 				
 				login(struct,name,password,verify);
 

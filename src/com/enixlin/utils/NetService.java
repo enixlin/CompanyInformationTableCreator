@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -17,9 +21,12 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -32,12 +39,24 @@ import org.apache.http.util.EntityUtils;
 public class NetService {
 
 	private CloseableHttpClient httpClient;
+	private CloseableHttpResponse response1;
+	private Header[] headers;
 	private HttpGet httpGet;
 	private HttpPost httpPost;
 
 	public CloseableHttpClient getHttpClient() {
-		return httpClient;
+		return this.httpClient;
 	}
+	
+	public Header[]  getHeaders() {
+		return  this.headers;
+	}
+	
+	public CloseableHttpResponse getResponse() {
+		return this.response1;
+	}
+	
+	
 
 	/**
 	 * 网络连接服务实现类NetService构造函数
@@ -67,11 +86,16 @@ public class NetService {
 	 */
 	public String HttpGet(String requestUrl) {
 		String result = null;
+	
 
 		HttpGet httpGet = new HttpGet(requestUrl);
+
+
 		try {
 			CloseableHttpResponse response = this.httpClient.execute(httpGet);
+			response1=response;
 			HttpEntity entity = response.getEntity();
+			headers = response.getHeaders("Set-Cookie");
 			result = EntityUtils.toString(entity);
 
 		} catch (ClientProtocolException e) {
@@ -108,9 +132,11 @@ public class NetService {
 	        //httpPost.setHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
 	        
 	        //执行请求操作，并拿到结果（同步阻塞）
-	        CloseableHttpResponse response = this.httpClient.execute(httpPost);
+			CloseableHttpResponse response = this.httpClient.execute(httpPost);
+			response1=response;
 	        //获取结果实体
 	        HttpEntity entity = response.getEntity();
+	        headers = response.getHeaders("Set-Cookie");
 	        if (entity != null) {
 	            //按指定编码转换结果实体为String类型
 	            result = EntityUtils.toString(entity, encoding);
