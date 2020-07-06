@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+	   
+     
+<html>  
+<head>
+<meta http-equiv="content-type" content="text/html;charset=GBK">     
+<title>国家外汇管理局网上申报系统</title> 
+<link href="/BizforBankWeb/css/style.css" rel="stylesheet" type="text/css" />
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/jquery.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/common.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/customString_new.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/formVerify.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/verify.js"></script>
+<SCRIPT LANGUAGE="JavaScript"> 
+<!--
+	$(document).ready(function(){
+		// 返回
+		$("#backButton").click(function(){
+			window.location.href="/BizforBankWeb/servlet/customerSearch?pageSize=60000&expPgNo=0&expCount=0&customerCode=&customerName=&dominationType=1&recsts=9&curPageNum=136";
+		});
+	});
+//-->
+</SCRIPT>
+</head>
+<body>
+<form id="frm" name="frm" action="" method="post"> 
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  		<tr>
+			<td id="primary" valign="top" class="text01">
+				<table border="0" cellspacing="1" cellpadding="0" width="100%">
+					<tr>
+			    		<td height="18"  valign="middle" class="positionborder">    	
+			    			<div class="positiontext" id="currentposition">
+			    				<table border="0" cellspacing="1" cellpadding="0" width="100%">
+			  						<tr>
+								    	<td width="8"><img src="/BizforBankWeb/images/currentpositionbg.jpg" width="8" height="18" id="positionimg"/></td>
+								    	<td><strong>&nbsp;当前位置：基础档案->单位基本情况表->单位基本情况表查询</strong></td>
+								    	<td align="right">
+								    	    <input type="button" name="backButton" id="backButton" value="返回(R)" class="button" accesskey="R"  tabindex="600">
+								    	</td>
+								    	<td width="20"></td>
+							    	</tr>
+								</table>
+							</div>
+						</td>
+			  		</tr>
+					<tr>
+						<td valign="top">
+							<div id="primaryinfo">
+								<table border="0" cellspacing="1" cellpadding="0" width="98%" align="center">
+						    		<tr>
+						    			<td height="21" valign="middle">
+											<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+												<tr>
+													<td width="16%" align="left">组织机构代码</td>
+													<td width="44%" align="left">
+														<input name="customerCode" id="customerCode" type="text" value="X18336880" fieldTitle="组织机构代码" fieldType="number" value="" checkLength="9" tabindex="10" Onkeydown="_afterEnter();" class="input03" style="width:45%" maxlength="9" readonly/>
+													</td>				
+													<td width="12%" align="left"></td>
+													<td width="28%" align="center">状态：已核查</td>	  			
+												</tr>
+												<tr>		
+													<td align="left">机构名称</td>
+													<td align="left" colspan="3"><input name="customerName" id="customerName" type="text"  fieldTitle="机构名称" tabindex="30" Onkeydown="_afterEnter();" class="input03" value="江门市新会区华堡钢具有限公司" style="width:96.3%" maxlength="128" readonly/></td>				
+												</tr>
+												<tr>		
+														<td align="left">组织机构简称</td>
+														<td align="left">
+															<input name="customerShortName" id="customerShortName" type="text" fieldTitle="组织机构简称" ignore="false" class="input03" tabindex="3" Onkeydown="_afterEnter();" value="" style="width:98%" maxlength="128"/>
+														</td>
+														<td align="left" width="15%">组织机构英文名称</td>
+														<td align="left"  width="30%">
+															<input name="customerENname" id="customerENname" type="text" fieldTitle="组织机构英文名称" ignore="false" class="input03" tabindex="4" Onkeydown="_afterEnter();" value="" style="width:88.5%" maxlength="128"/>
+														</td>
+													</tr>
+													<tr>		
+														<td align="left">统一社会信用代码</td>
+														<td align="left"><input name="cretCode" id="cretCode" type="text" fieldTitle="统一社会信用代码" ignore="false" class="input03" tabindex="5" Onkeydown="_afterEnter();" value="" style="width:98%" maxlength="128"/>
+														<td align="left">LEI编码</td>
+														<td align="left"><input name="LEICode" id="LEICode" type="text" fieldTitle="LEI编码" ignore="false" class="input03" tabindex="6" Onkeydown="_afterEnter();" value="" style="width:88.5%" maxlength="128"/>
+													</tr>	
+												<tr><td colspan="4"><hr class="info"></td></tr>
+												<tr>
+													<td colspan="4">   
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>
+																<td width="16%" align="left">住所/营业场所代码及名称</td>
+																<td width="21%" align="left"><input name="regionCode" id="regionCode" type="text" fieldTitle="住所/营业场所代码"  fieldType="number" checkLength="6" tabindex="40" Onkeydown="_afterEnter();" class="input03" value="440705" style="width:94%" maxlength="6" readonly/></td>
+																<td width="63%" align="left"><input name="regionName" id="regionName" type="text" value="江门市新会区" class="input03" style="width:95%" maxlength="64" readonly/></td>	  			
+															</tr>  
+														</table>
+													</td>
+												</tr>				
+												<tr>	
+													<td colspan="4">   
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>			
+																<td width="16%" align="left">常驻国家（地区）代码及名称</td>
+																<td width="21%" align="left"><input name="countryCode" id="countryCode" type="text" fieldTitle="常驻国家（地区）代码" class="input03" value="CHN" checkLength="3" tabindex="50" Onkeydown="_afterEnter();" style="width:94%" maxlength="3" readonly/></td>
+																<td width="63%"><input name="countryName" id="countryName" type="text" value="中华人民共和国" class="input03" style="width:95%" maxlength="64" readonly/></td>
+															</tr>
+														</table>
+													</td>						
+												</tr>	
+												<tr>		
+													<td colspan="4"> 
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>				
+																<td width="16%" align="left" valign="top">外方投资者国别（地区）代码及名称</td>
+																<td width="84%" align="left">
+																	<table width="100%">
+																		<tr><td width="7%">国别1：</td><td width="17%"><input name="countryCode1" id="countryCode1" type="text" fieldTitle="外方投资者国别（地区）1代码"  tabindex="60" Onkeydown="_afterEnter();" class="input03" value="" style="width:96%" maxlength="3" readonly/></td>
+																		<td width="76%"><input name="countryName1" id="countryName1" type="text" value="" class="input03"  style="width:95.5%" maxlength="64" readonly/></td></tr>
+																		<tr><td width="7%">国别2：</td><td width="17%"><input name="countryCode2" id="countryCode2" type="text" fieldTitle="外方投资者国别（地区）2代码"  tabindex="70" Onkeydown="_afterEnter();" class="input03" value="" style="width:96%" maxlength="3" readonly/></td>
+																		<td width="76%"><input name="countryName2" id="countryName2" type="text" value="" class="input03" style="width:95.5%" maxlength="64" readonly/></td></tr>
+																	 	<tr><td width="7%">国别3：</td><td width="17%"><input name="countryCode3" id="countryCode3" type="text" fieldTitle="外方投资者国别（地区）3代码"  tabindex="80" Onkeydown="_afterEnter();" class="input03" value="" style="width:96%" maxlength="3" readonly/></td>
+																	 	<td width="76%"><input name="countryName3" id="countryName3" type="text" value="" class="input03" style="width:95.5%" maxlength="64" readonly/></td></tr>
+																		<tr><td width="7%">国别4：</td><td width="17%"><input name="countryCode4" id="countryCode4" type="text" fieldTitle="外方投资者国别（地区）4代码"  tabindex="90" Onkeydown="_afterEnter();" class="input03" value="" style="width:96%" maxlength="3" readonly/></td>
+																		<td width="76%"><input name="countryName4" id="countryName4" type="text" value="" class="input03" style="width:95.5%" maxlength="64" readonly/></td></tr>
+																		<tr><td width="7%">国别5：</td><td width="17%"><input name="countryCode5" id="countryCode5" type="text" fieldTitle="外方投资者国别（地区）5代码"  tabindex="100" Onkeydown="_afterEnter();" class="input03" value="" style="width:96%" maxlength="3" readonly/></td>
+																		<td width="76%"><input name="countryName5" id="countryName5" type="text" value="" class="input03" style="width:95.5%" maxlength="64" readonly/></td></tr>
+																	 </table>
+																</td>	
+															</tr>
+														</table>
+													</td>									
+												</tr>		
+												<tr>	
+													<td colspan="4"> 
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>	
+																<td width="16%" align="left">经济类型代码</td>
+																<td width="21%" align="left"><input name="econTypeCode" id="econTypeCode" type="text" fieldTitle="经济类型代码"  fieldType="number" checkLength="3"  tabindex="110" Onkeydown="_afterEnter();" class="input03" value="173" style="width:94%" maxlength="3" readonly/></td>
+																<td width="63%"><input name="econTypeName" id="econTypeName" type="text" value="私营有限责任（公司）" class="input03" style="width:95%" maxlength="64" readonly/></td>				
+															</tr>
+														</table>
+													</td>						
+												</tr>	  	
+												<tr>		
+													<td colspan="4"> 
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>		
+																<td width="16%" align="left">所属行业属性代码</td>
+																<td width="21%" align="left"><input name="indAttrCode" id="indAttrCode" type="text" fieldTitle="所属行业属性代码"  fieldType="number" checkLength="4" tabindex="120" Onkeydown="_afterEnter();" class="input03" value="0333" style="width:94%" maxlength="4" readonly/></td>
+																<td width="63%"><input name="industryName" id="industryName" type="text" value="金属制品业" class="input03" style="width:95%" maxlength="64" readonly/></td>				
+															</tr>
+															<tr>					
+																<td align="left">是否特殊经济区内企业</td>
+																<td align="left">
+																
+																
+																
+																	<input type="radio" name="isTaxfree" id="isTaxfree" tabindex="130" Onkeydown="_afterEnter();" value="Y" disabled/>&nbsp;<label for="isTaxfree">是</label>&nbsp;&nbsp;
+														    		<input type="radio" name="isTaxfree" id="notTaxfree" tabindex="140" Onkeydown="_afterEnter();" value="N" checked disabled/>&nbsp;<label for="notTaxfree">否</label>	
+																
+																
+																
+														    	</td>
+														    	<td>	
+														    		<input name="taxfreeCode" id="taxfreeCode" id="taxfreeCode" type="text"  tabindex="150" Onkeydown="_afterEnter();"  fieldTitle="特殊经济区企业类型代码"  fieldType="number" checkLength="" class="input03" value="00" style="width:28.1%" maxlength="2" readonly/>
+														    		<input name="taxfreeDesc" id="taxfreeDesc" type="text" value="一般贸易区" class="input03" style="width:65%" maxlength="64" readonly/>
+														    	</td>
+															</tr>
+														</table>
+													</td>							
+												</tr>
+												<tr >	
+														<td align="left">经营期限</td>	
+														<td align="left"><input name="manageLimit" id="manageLimit" class="input03" fieldTitle="经营期限" type="text"  value="" tabindex="22" Onkeydown="_afterEnter();"  class="input01" style="width:98%" maxlength="256"/></td>				
+														<td align="left">经营范围</td>	
+														<td align="left"><input name="manageScope" id="manageScope" class="input03" fieldTitle="经营范围" type="text"  value="" tabindex="23" Onkeydown="_afterEnter();"  class="input01" style="width:88.5%" maxlength="256"/></td>				
+													</tr>
+													<tr >	
+														<td align="left">法定代表人</td>	
+														<td align="left"><input name="inCorpOrator" id="inCorpOrator" class="input03" fieldTitle="法定代表人" type="text"  value="" tabindex="24" Onkeydown="_afterEnter();"  class="input01" style="width:98%" maxlength="256"/></td>
+														<td align="left">法定代表人身份证件号码</td>	
+														<td align="left"><input name="inCorpOratorId" id="inCorpOratorId" class="input03" fieldTitle="法定代表人身份证件号码" type="text"  value="" tabindex="25" Onkeydown="_afterEnter();"  class="input01" style="width:88.5%" maxlength="18"/></td>				
+													</tr>
+													<tr>
+													<td align="left">注册/开业成立日期</td>	
+													<td align="left">
+														<input id="registerDate" name="registerDate" value="" type="text" class="input03"  size="10" maxlength="10" tabindex="20" onkeydown="_afterEnter()" /><img src="/BizforBankWeb/images/calendar.gif" width="16" height="16" onclick="return showCalendar('registerDate', '%Y-%m-%d');" />
+													</td>
+													<td align="left">海关注册号</td>	
+													<td align="left"><input name="customsno" id="customsno" class="input03" fieldTitle="注册海关号" type="text"  value="" tabindex="33" Onkeydown="_afterEnter();"  class="input01" style="width:88.5%" maxlength="256"/></td>				
+												</tr>
+												<tr>
+													<td align="left">机构类型</td>	
+													<td align="left">
+														<select id="branchType" name="branchType" class="input03" style="width:94%" disabled="disabled">
+																<option>--请选择--</option>
+																<option value="1"  >机关</option>
+																<option value="3"  >事业单位</option>
+																<option value="5"  >企业</option>
+																<option value="7"  >社会团体</option>
+																<option value="8"  >军队武警、境外机构、驻华使领馆等特殊机构</option>
+																<option value="9"  >其他组织机构</option>
+															</select>
+													</td>
+																	
+												<!-- added by huangxh20190808 start -->
+													<td align="left">联系人姓名</td>	
+													<td align="left"><input name="contactor" id="contactor" class="input03" type="text"  value="" tabindex="26" Onkeydown="_afterEnter();"  class="input01" style="width:88.5%" maxlength="256" readonly/></td>				
+													<!-- added by huangxh20190808 end -->
+																		
+												</tr>
+												<!-- added by huangxh20190808 start -->
+												<tr >	
+													<td align="left">联系电话</td>	
+													<td align="left"><input name="contactel" id="contactel" class="input03" type="text" fieldType="telephone"   value="" tabindex="27" Onkeydown="_afterEnter();"  class="input01" style="width:98%" maxlength="256" readonly/></td>				
+													<td align="left">传真</td>	
+													<td align="left"><input name="contactFAX" id="contactFAX" class="input03" fieldTitle="传真" type="text" fieldType="telephone" value="" tabindex="28" Onkeydown="_afterEnter();"  class="input01" style="width:88.5%" maxlength="256" readonly/></td>				
+												</tr>				
+												<!-- added by huangxh20190808 end -->				
+												<tr>		
+													<td colspan="4"> 
+														<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+															<tr>
+																<td width="16%" align="left">所属外汇局代码</td>
+																<td width="21%" align="left"><input name="safeCode" id="safeCode" type="text" class="input03" value="440700" style="width:94%" maxlength="6" readonly/></td>
+																<td width="63%"><input name="safeName" id="safeName" type="text" value="国家外汇管理局江门市中心支局" class="input03" style="width:95%" maxlength="128" readonly/></td>				
+															</tr>
+														</table>
+													</td>						
+												</tr>	
+												<tr>		
+													<td align="left">申报方式</td>
+													<td align="left">
+														
+														
+														
+															<input type="radio" name="reportType" id="paperReport" tabindex="160" Onkeydown="_afterEnter();"  value="1" disabled/>&nbsp;<label for="paperReport">纸质申报</label>&nbsp;&nbsp;
+											    			<input type="radio" name="reportType" id="onlineReport" tabindex="170" Onkeydown="_afterEnter();"  value="2" checked disabled />&nbsp;<label for="onlineReport">网上申报</label>&nbsp;&nbsp;	
+														
+														
+																
+													</td>				
+													<td align="left">SwiftCode</td>
+													<td align="left"><input name="swiftCode" id="swiftCode" type="text" fieldTitle="SWIFTCODE" ignore="false" class="input03" tabindex="5" Onkeydown="_afterEnter();" value="" style="width:88.5%" maxlength="128"/>
+												</tr>									
+												<tr>
+													<td align="left">机构地址</td>	
+													<td align="left"><input name="customerAddr" id="customerAddr" type="text"  value="江门市新会区会城镇七堡大桥开发区" tabindex="180" Onkeydown="_afterEnter();"  class="input03" style="width:98%" maxlength="128" readonly/></td>				
+													<td align="left">邮政编码</td>
+													<td align="left"><input name="zipCode" id="zipCode" type="text" tabindex="190" Onkeydown="_afterEnter();"  fieldTitle="邮政编码"  fieldType="zip" class="input03" value="529156"  style="width:88.5%" maxlength="6" readonly/></td>				
+												</tr>													
+												<tr>
+													<td align="left">交易用Email</td> 
+													<td align="left"><input name="tradeEmail" id="tradeEmail" type="text" tabindex="200" Onkeydown="_afterEnter();"  fieldTitle="交易用Email"  fieldType="email"  value="" class="input03" style="width:98%" maxlength="128" readonly/></td>				
+													<td align="left">联系用Email</td>
+													<td align="left"><input name="email" id="email" type="text" tabindex="210" Onkeydown="_afterEnter();"  fieldTitle="联系用Email"  fieldType="email" class="input03" value="13869608888@163.com" style="width:88.5%" maxlength="128" readonly/></td>				
+												</tr>										
+												<tr>		
+													<td id="Memo" align="left" valign="top">备注</td>
+													<td align="left" colspan="3"><textarea name="remark" id="remark" tabindex="220" Onkeydown="_afterEnter();"  class="input03" value=""  rows="2" cols="100" style="width:96.2%" maxlength="130" readonly/></textarea></td>				
+												</tr>			
+												<!--tr><td colspan="4"><hr class="info"></td></tr>		
+												<tr>
+													<td align="left">金融机构标识码</td>
+													<td align="left"><input name="branchCode" id="branchCode" type="text"  value="" class="input03" style="width:98%" maxlength="19" readonly/></td>				
+													<td align="left">开户行名称</td>  
+													<td align="left"><input name="branchName" id="branchName" type="text" class="input03" value="" style="width:88.5%" maxlength="128" readonly/></td>				
+												</tr>	
+												<tr>
+													<td align="left">单位联系人</td>
+													<td align="left"><input name="contact" id="contact" type="text"  value="" tabindex="230" Onkeydown="_afterEnter();"  fieldTitle="单位联系人"  class="input03" style="width:98%" maxlength="20" readonly/></td>				
+													<td align="left">单位联系电话</td>
+													<td align="left"><input name="tel" id="tel" type="text" class="input03" tabindex="240" Onkeydown="_afterEnter();"  fieldTitle="单位联系电话" fieldType="telephone" value="" style="width:88.5%" maxlength="20" readonly/></td>				
+												</tr>		
+												<tr>
+													<td align="left">单位传真</td>   
+													<td align="left"><input name="fax" id="fax" type="text"  value="" tabindex="250" Onkeydown="_afterEnter();"  fieldTitle="单位传真" fieldType="telephone" class="input03" style="width:98%" maxlength="20" readonly/></td>				
+													<td align="left">修改日期</td>
+													<td align="left"><input name="updateDate" id="updateDate" type="text"  value="" class="input03" style="width:88.5%" maxlength="19" readonly/></td>				
+												</tr-->
+												<tr height="10"><td colspan="4"></td></tr>  	
+												<tr>		
+													<td width="100%" colspan="4">
+														<table width="100%" cellpadding="1" cellspacing="2" style="border-bottom: 1px solid #5C81A7;border-top: 1px solid #5C81A7;">
+															<tr>
+																<td width="5%"><div align="center">序号</div></td>
+																<td width="20%"><div align="center">金融机构标识码</div></td>
+																<td width="20%"><div align="center">单位联系人</div></td>
+																<td width="20%"><div align="center">单位联系电话</div></td>
+																<td width="20%"><div align="center">单位传真</div></td>
+																<td width="15%"><div align="center">修改日期</div></td>
+															</tr> 
+															
+															<tr>
+																<td><div align="center">1</div></td>
+																<td><div align="center">440700851401</div></td>
+																<td><div align="center">温小萍</div></td>
+																<td><div align="center">6496785</div></td>
+																<td><div align="center">6496798</div></td>
+																<td><div align="center">2019-11-03</div></td>
+															</tr>
+																		
+														</table>
+													</td>				
+												</tr>							
+											</table>
+										</td>
+			    					</tr>
+			    				</table>
+			    			</div>	  
+						</td>
+			  		</tr>
+				</table>  
+			</td>
+		</tr>
+	</table>
+</form>  
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      
+
+	  
+
+
+
+<html>
+<head>
+<title>国家外汇管理局网上申报系统</title>
+<link href="/BizforBankWeb/css/style.css" rel="stylesheet" type="text/css"/>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/jquery.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/common.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/customString_new.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/formVerify.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/verify.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/customercodeVerify.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/page.js"></script>
+<script language="JavaScript" type="text/javascript" src="/BizforBankWeb/javascript/commonAjax.js"></script>
+<SCRIPT LANGUAGE="JavaScript"> 
+	var pgCount = "60000";
+ 	var expPgNo;
+ 	var expCount;
+ 	var expFirst;
+ 	var expNext;
+	
+	function expfirst(){
+    	disableBtns([true,true]);
+		var pgNo = expPgNo.value;
+		if(pgNo == "0"){
+			doFormRequest("POST",'/BizforBankWeb/servlet/customerExport?method=expsrch',document.forms["frm"],endOfSumbit);
+		}else{	    
+	    	doExportRequest(1);
+	    	if(parseInt(expCount.value)>parseInt(pgCount)){ 
+    	  		disableBtns([false,false])
+  			}else{
+ 		  		disableBtns([false,true]);
+			}
+		}
+	}
+	function doExpNext(){
+   		disableBtns([true,true]);
+   		var expCountVal=parseInt(expCount.value);
+   		var expPgNoVal=parseInt(expPgNo.value);
+   		doExportRequest(expPgNoVal+1);   
+   		if((expPgNoVal+1)*parseInt(pgCount)>expCountVal){
+     		disableBtns([false,true]);
+   		}else{
+     		disableBtns([false,false]);
+   		}
+	}
+	function endOfSumbit(result){
+ 		var results=result.split(",");
+   		expCount.value=results[1];
+   		doExportRequest(results[0]);
+   		if(parseInt(results[1])>parseInt(pgCount)){
+     		disableBtns([false,false])
+   		}else{
+     		disableBtns([false,true]);
+   		}
+	}
+	
+	function doExportRequest(pgNo){
+   		expPgNo.value=pgNo;
+   		document.frm.action='/BizforBankWeb/servlet/customerExport?method=export';	
+   		//向服务器发送导出请求
+   		document.frm.submit();
+	}
+	function init(){
+  		expPgNo = document.all("expPgNo");
+  		expCount = document.all("expCount");  		
+  		expFirst = document.all("expFirst");
+  		expNext = document.all("expNext");
+		
+	}
+	function disableBtns(dis){
+  		if(expPgNo==null||expCount==null||expFirst==null||expNext==null){
+    		 throw "对不起，初始化界面对象失败！" ;
+ 		}else{ 
+     		expFirst.disabled=dis[0];
+     		expNext.disabled=dis[1];
+     	}
+	}
+	$(document).ready(function(){
+		// 查询
+		$("#queryButton").click(function(){
+			_trimParameter();
+			if(!checkParam()){
+				return false;
+			}
+			document.frm.action="/BizforBankWeb/servlet/customerSearch";	
+			document.frm.submit();
+		});
+		// 导出
+		/*$("#exportButton").click(function(){
+			_trimParameter();
+			if(!checkParam()){
+				return false;
+			}
+			document.frm.action="/BizforBankWeb/servlet/customerExport";	
+			document.frm.submit();
+		});*/
+	});
+	
+	// 去除查询项空格
+	function _trimParameter(){
+		$("#customerCode").val($.trim($("#customerCode").val()));
+		$("#customerName").val($.trim($("#customerName").val()));
+	}
+	//校验查询条件
+	function checkParam(){
+		if($("#customerCode").val()!="" && !_customerCodeCheck($("#customerCode").val())){
+			return false;
+		}
+		
+		return true;
+	}
+	//对分页查询条件进行校验
+	function checkPage(){
+		_trimParameter();
+		//校验查询条件
+		if(!checkParam()){
+			return false;
+		}
+		return true;
+	}
+</script>
+</head>
+<body onload="init();">
+<form id="frm" name="frm" action="" method="post">  
+	<input type="hidden" id="pageSize" name="pageSize" value="60000"/>
+	<input type = "hidden" name="expPgNo" value="0"/>
+	<input type = "hidden" name="expCount" value="0"/>
+	<table border="0" cellspacing="1" cellpadding="0" class="text01" width="100%">
+     	<tr>
+     		<td height="18"  valign="middle"><img src="/BizforBankWeb/images/currentpositionbg.jpg" width="8" height="18" id="positionimg"/><div class="currentposition"><strong>&nbsp;当前位置：基础档案->单位基本情况表->单位基本情况表查询</strong></div></td>
+     		<td class="currentposition" align="right"></td>
+     	</tr>
+     	<tr>
+     		<td height="25" colspan="2">
+				<div id="query">
+					组织机构代码&nbsp;<input name="customerCode" id="customerCode" type="text" class="queryinput" value="" size="9" maxlength="9" tabindex="100" Onkeydown="_afterEnter()"/>&nbsp;
+					组织机构名称&nbsp;<input name="customerName" id="customerName" type="text" class="queryinput"  value="" size="20" maxlength="128" tabindex="200" Onkeydown="_afterEnter()" />	  
+					
+						
+					
+					<select name="dominationType" id="dominationType" style="{height:20px;}">
+						
+							
+							
+							
+								<option value="1" selected>直辖</option>
+								<option value="2">所辖</option>
+							
+						
+					</select>
+					当前状态&nbsp;
+					<select name="recsts" style="{height:20px;}"><option value="9">全部</option><option value="0">待核查</option><option value="1">已核查</option><option value="2">停用</option></select>
+					<input type="button" name="queryButton" id="queryButton" value="查询(Q)" class="button" accesskey="Q" tabindex="400" Onkeydown="_afterEnter()">
+					<!--
+					<input type="button" name="expFirst" id="expFirst" value="导出(E)" accesskey="E" class="button" tabindex="500" Onkeydown="_afterEnter()" onclick="expfirst();"/>
+					-->
+					
+						
+							<!--
+							<input type="button" name="expNext" id="expNext" value="导出下一批(N)" accesskey="N" class="button02" tabindex="600" Onkeydown="_afterEnter()" onclick="doExpNext();" disabled/>
+							-->
+						
+						
+					
+				</div>	   
+			</td>
+      	</tr>	    
+      	<tr>
+		    <td colspan="2">
+				<div id="primarydata" >
+					<table id="listTable" width="150%" border="0" cellpadding="1" cellspacing="1" bgcolor="#9CC6F7">
+						<tr height="22">
+							<th width="3%"><div align="center">序号</div></th>
+							<th width="7%"><div align="center">组织机构代码</div></th>
+							<th width="15%"><div align="center">机构名称</div></th>      
+							<th width="15%"><div align="center">机构地址</div></th> 
+							<th width="8%"><div align="center">住所/营业场所</div></th>           
+							<th width="10%"><div align="center">常驻国家/地区</div></th>
+							<th width="15%"><div align="center">所属外汇局</div></th>
+							<th width="8%"><div align="center">经济类型</div></th>
+							<th width="10%"><div align="center">行业属性</div></th>
+							<th width="5%"><div align="center">申报方式</div></th>
+							<th width="4%"><div align="center">状态</div></th>							
+						</tr>
+     					
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">1</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007066555&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007066555</a></div></td>
+					        <td class="listdata"><div align="center">江门市江海区人民政府江南街道办事处</div></td>    
+					        <td class="listdata"><div align="center">广东江门市江海区滘头东路33号</div></td>        
+					        <td class="listdata"><div align="center">江门市江海区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">其他</div></td>	
+						    <td class="listdata"><div align="center">基层群众自治组织</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">2</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007068622&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007068622</a></div></td>
+					        <td class="listdata"><div align="center">江门市江海区人民政府外海街道办事处</div></td>    
+					        <td class="listdata"><div align="center">广东江门市江海区外海中华大道74号</div></td>        
+					        <td class="listdata"><div align="center">江门市江海区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">其他</div></td>	
+						    <td class="listdata"><div align="center">基层群众自治组织</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">3</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007068702&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007068702</a></div></td>
+					        <td class="listdata"><div align="center">蓬江区环市镇人民政府环市街道办事处</div></td>    
+					        <td class="listdata"><div align="center">江门市蓬江区建设路57号</div></td>        
+					        <td class="listdata"><div align="center">江门市蓬江区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有全资</div></td>	
+						    <td class="listdata"><div align="center">中国共产党机关</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">4</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=00707108X&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">00707108X</a></div></td>
+					        <td class="listdata"><div align="center">江门市公安局新会分局</div></td>    
+					        <td class="listdata"><div align="center">江门市新会区会城中心路38号</div></td>        
+					        <td class="listdata"><div align="center">江门市新会区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有全资</div></td>	
+						    <td class="listdata"><div align="center">国家机构</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">5</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007071557&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007071557</a></div></td>
+					        <td class="listdata"><div align="center">江门市蓬江区棠下镇人民政府</div></td>    
+					        <td class="listdata"><div align="center">广东省江门市蓬江区棠下镇棠下大道</div></td>        
+					        <td class="listdata"><div align="center">江门市蓬江区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有全资</div></td>	
+						    <td class="listdata"><div align="center">国家机构</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">6</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007071709&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007071709</a></div></td>
+					        <td class="listdata"><div align="center">江门市蓬江区荷塘人民政府</div></td>    
+					        <td class="listdata"><div align="center">江门市蓬江区荷塘镇中兴三路68号</div></td>        
+					        <td class="listdata"><div align="center">江门市</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有独资（公司）</div></td>	
+						    <td class="listdata"><div align="center">国家机构</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">7</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007071717&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007071717</a></div></td>
+					        <td class="listdata"><div align="center">江门市江海区人民政府礼乐街道办事处</div></td>    
+					        <td class="listdata"><div align="center">广东省江门市江海区礼乐长兴街122号</div></td>        
+					        <td class="listdata"><div align="center">江门市江海区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有全资</div></td>	
+						    <td class="listdata"><div align="center">国家机构</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">8</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=007071741&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">007071741</a></div></td>
+					        <td class="listdata"><div align="center">江门市新会区沙堆镇人民政府</div></td>    
+					        <td class="listdata"><div align="center">江门市新会区沙堆镇</div></td>        
+					        <td class="listdata"><div align="center">江门市新会区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">国有全资</div></td>	
+						    <td class="listdata"><div align="center">国家机构</div></td>
+						    <td class="listdata"><div align="center">
+						    纸质申报
+						    </div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">9</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=050680091&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">050680091</a></div></td>
+					        <td class="listdata"><div align="center">江门市佰利光电有限公司</div></td>    
+					        <td class="listdata"><div align="center">江门市江海区外海金溪一路12号厂房（自编之一）</div></td>        
+					        <td class="listdata"><div align="center">江门市江海区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">私营有限责任（公司）</div></td>	
+						    <td class="listdata"><div align="center">批发业</div></td>
+						    <td class="listdata"><div align="center">
+						    
+						    网上申报</div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">10</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=05071153X&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">05071153X</a></div></td>
+					        <td class="listdata"><div align="center">江门市路思拓电机电器有限公司</div></td>    
+					        <td class="listdata"><div align="center">江门市江海区金辉路15号1幢5幢</div></td>        
+					        <td class="listdata"><div align="center">江门市</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">私营有限责任（公司）</div></td>	
+						    <td class="listdata"><div align="center">电气机械和器材制造业</div></td>
+						    <td class="listdata"><div align="center">
+						    
+						    网上申报</div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					   
+				       	<tr height="22">  
+					        <td class="listdata"><div align="center">11</div></td>
+					        <td class="listdata"><div align="center"><a href="/BizforBankWeb/servlet/customerDetail?customerCode=050728948&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQwMjAzNzM0NDkqMTU5NDAyMDM3MzQ0OQ%253D%253D">050728948</a></div></td>
+					        <td class="listdata"><div align="center">江门市成尚贸易有限公司</div></td>    
+					        <td class="listdata"><div align="center">广东省江门市蓬江区双龙大道78号204</div></td>        
+					        <td class="listdata"><div align="center">江门市蓬江区</div></td>        
+					        <td class="listdata"><div align="center">中华人民共和国</div></td>                			        
+						    <td class="listdata"><div align="center">国家外汇管理局江门市中心支局</div></td>	
+						   	<td class="listdata"><div align="center">私营有限责任（公司）</div></td>	
+						    <td class="listdata"><div align="center">零售业</div></td>
+						    <td class="listdata"><div align="center">
+						    
+						    网上申报</div></td>
+					        <td class="listdata"><div align="center">已核查</div></td>   
+	   					</tr>
+					    		  
+    				</table>
+				</div>
+			</td>
+    	</tr>
+    	<tr>  
+			<td colspan="3">
+				
+					
+				
+
+
+
+ 
+
+	
+	<div id="pagezone" class="pagination">
+		<ul>			
+			<li class="firstpage"><input type="hidden" name="curPageNum" value="">第 1 页</li>
+			
+				<li class="firstpage" >&nbsp;&nbsp;<a href="#" disabled>首&nbsp;&nbsp;页</a></li>
+				<li class="nextpage"  ><a href="#" disabled>上一页</a></li>				
+						
+			<li class="nextpage" onclick="nextPage('/BizforBankWeb/servlet/customerSearch','2');"><a name="nextpage" href="#">下一页</a></li>
+			<li class="endpage" onclick="nextPage('/BizforBankWeb/servlet/customerSearch',0);"><a name="endpage" href="#">尾&nbsp;&nbsp;页</a></li>
+		</ul>
+	</div>
+
+<script language="javascript">	
+	<!--如果页面中的记录数小于$per_Page_Size+1，则补空行-->
+	initList(10);	
+</script>
+ 
+     		</td>  
+		</tr>
+	</table>	
+</form>
+</body>
+</html>
+<script language="javascript">    
+<!--
+	initList(10);    
+//-->
+</script>
