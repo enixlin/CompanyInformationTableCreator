@@ -17,6 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -74,7 +75,9 @@ public class NetService {
 	 * @return
 	 */
 	public CloseableHttpClient createHttpClient() {
-		this.httpClient = HttpClients.createDefault();
+		
+		RequestConfig config=RequestConfig.custom().setConnectTimeout(500000).setConnectionRequestTimeout(10000).setSocketTimeout(50000).setRedirectsEnabled(false).build();
+		this.httpClient = HttpClients.custom().setDefaultRequestConfig(config).build();
 		return this.httpClient;
 	}
 
@@ -94,6 +97,11 @@ public class NetService {
 		try {
 			CloseableHttpResponse response = this.httpClient.execute(httpGet);
 			response1=response;
+			int responseCode=response.getStatusLine().getStatusCode();
+			if(responseCode==302) {
+				Header locationHeader= response.getFirstHeader("Location");
+				String location = locationHeader.getValue();
+			}
 			HttpEntity entity = response.getEntity();
 			headers = response.getHeaders("Set-Cookie");
 			result = EntityUtils.toString(entity);

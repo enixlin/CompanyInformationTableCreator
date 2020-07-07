@@ -5,8 +5,10 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
@@ -78,10 +80,14 @@ public class Main {
 	/**
 	 * 处理用户登录asone系统
 	 * 
-	 * @param structCode 机构码
-	 * @param name       用户 名
-	 * @param password   用户密码
-	 * @param verifyCode 验证码
+	 * @param structCode
+	 *            机构码
+	 * @param name
+	 *            用户 名
+	 * @param password
+	 *            用户密码
+	 * @param verifyCode
+	 *            验证码
 	 */
 	public void login(String structCode, String name, String password, String verifyCode) {
 
@@ -91,10 +97,9 @@ public class Main {
 		Map<String, String> postParams = new LinkedHashMap<>();
 		// 请求返回结果
 		String result = "";
-		String LTPAToken="";
+		String LTPAToken = "";
 
-		// 对密码进行MD5加密,使用jdk里的scriptEngine运行md5.js里的hex_md5函数
-		// document.all.pwd.value=hex_md5( pwdValue );
+		// 对密码进行MD5加密,使用jdk里的scriptEngine类，运行md5.js里的hex_md5函数
 		ScriptEngineManager manager = new ScriptEngineManager();
 		ScriptEngine engine = manager.getEngineByName("javascript");
 		// 读取js
@@ -128,13 +133,13 @@ public class Main {
 		postParams.put("pwd_f", "");
 		postParams.put("check", verifyCode);
 		result = ns.HttpPost(requestUrl, postParams, "utf-8");
-		//System.out.println("checkCode return result is:" + result);
-		
-		//从返回的请求响应html中取得加密的验证码
-		int start = result.indexOf("name=\"safeValidateCode\" value=\"")+31 ;
+		// System.out.println("checkCode return result is:" + result);
+
+		// 从返回的请求响应html中取得加密的验证码
+		int start = result.indexOf("name=\"safeValidateCode\" value=\"") + 31;
 		String encrytVerifyCode = result.substring(start, start + 32);
-		//System.out.println(encrytVerifyCode);
-		
+		// System.out.println(encrytVerifyCode);
+
 		/*
 		 * 用户登录 请求地址：http://zwfw.safe.gov.cn/asone/servlet/UniLoginServlet 登录使用POST方式
 		 * ，请求参数如下： orgCode: 075093053 userCode: billluo1
@@ -154,27 +159,93 @@ public class Main {
 		postParams.put("loginType", "");
 		postParams.put("biztype", "null");
 		result = ns.HttpPost(requestUrl, postParams, "utf-8");
-		Header[] headers=ns.getHeaders();
-		String str=headers[0].toString();
-		LTPAToken=str.substring(22,str.length());
+		Header[] headers = ns.getHeaders();
+		String str = headers[0].toString();
+		LTPAToken = str.substring(22, str.length());
 		System.out.println(LTPAToken);
-		
-		
-		requestUrl ="http://asone.safe/asone/servlet/SSOServer?falseflag=ClientNotLogin&userCode=&orgCode=&orgType=&password=&task=doauthenticate&callbackUrl=http%3A%2F%2Fasone.safe%3A80%2FBizforBankWeb%2Fservlet%2FcustomerSearch%3Fcurrent_appCode%3DBZBO%26asone_addr%3Dasone.safe%253A80%26userType%3D";
+
+		requestUrl = "http://asone.safe/asone/servlet/SSOServer?falseflag=ClientNotLogin&userCode=&orgCode=&orgType=&password=&task=doauthenticate&callbackUrl=http%3A%2F%2Fasone.safe%3A80%2FBizforBankWeb%2Fservlet%2FcustomerSearch%3Fcurrent_appCode%3DBZBO%26asone_addr%3Dasone.safe%253A80%26userType%3D";
 		result = ns.HttpGet(requestUrl);
-	CloseableHttpResponse r=ns.getResponse();
-	
+		CloseableHttpResponse response = ns.getResponse();
+
+		int responseCode = response.getStatusLine().getStatusCode();
+		Header locationHeader = response.getFirstHeader("Location");
+		String location = locationHeader.getValue();
+		System.out.println(result);
+
+		String regex = "&LTPAToken=.*";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(location);
+		while (m.find()) {
+			LTPAToken = m.group().substring(11, m.group().length());
+			System.out.println(LTPAToken);
+
+		}
+		// System.out.println(result);
+
+		// 请求单位基本情况表客户列表
+		requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken="
+				+ LTPAToken;
+		result = ns.HttpGet(requestUrl);
+		// System.out.println(result);
+
+		// 请求最后一页,先取得请求的链接
+		String lastPageAction = "";
+		String regex_lastPageAction = "<li .*;\">";
+		Pattern p_page = Pattern.compile(regex_lastPageAction);
+		Matcher m_page = p_page.matcher(result);
+		while (m_page.find()) {
+			System.out.println(m_page.group());
+			lastPageAction = m_page.group().substring(39, 123);
+		}
+		System.out.println(lastPageAction);
+
+		requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch";
+		postParams.clear();
+		postParams.put("pageSize", "60000");
+		postParams.put("expPgNo", "0");
+		postParams.put("expCount", "0");
+		postParams.put("customerCode", "");
+		postParams.put("customerName", "");
+		postParams.put("dominationType", "1");
+		postParams.put("recsts", "9");
+		postParams.put("curPageNum", "0");
+		result = ns.HttpPost(requestUrl, postParams, "utf-8");
 		System.out.println(result);
 		
 		
+		ArrayList<String> links=getClientDetailLinks(result);
+		String host="http://asone.safe/";
+		System.out.println(links);
 
-		
-		//请求单位基本情况表
-//		requestUrl ="http://asone.safe/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken="+LTPAToken;
-//		result = ns.HttpGet(requestUrl);
-//		System.out.println(LTPAToken);
-//		System.out.println(result);
+		// 取得总页数
+		String s[] = result.split(">第.*页<");
+		System.out.println(s);
 
+		// pageSize=60000&expPgNo=0&expCount=0&customerCode=&customerName=&dominationType=1&recsts=9&curPageNum=0
+		// System.out.println(m_page.find());
+		// if(m_page.find()) {
+		// String lastPageAction=m.group();
+		// System.out.println(lastPageAction);
+		// }
+
+	}
+	
+	//取得第N页的客户清单
+	public String getNPage(int page_n) {
+		String html="";
+		return html;
+	}
+
+	// 从html代码中提取单个客户的单位基本情况表的链接
+	public ArrayList<String> getClientDetailLinks(String html) {
+		ArrayList<String> links = new ArrayList<>();
+		Pattern p=Pattern.compile("<a href=\".*\">");
+		Matcher m=p.matcher(html);
+		while(m.find()) {
+			links.add(m.group().substring(9,m.group().length()-2));
+		}
+		return links;
 	}
 
 	/**
@@ -213,18 +284,16 @@ public class Main {
 		btnNewButton.addActionListener(new ActionListener() {
 			// 登录
 			public void actionPerformed(ActionEvent e) {
-//				取得各个输入框中的文本值
-//				String name = clientName.getText();
-//				String password = new String(pwd.getPassword());
-//				String struct = structCode.getText();
+				// 取得各个输入框中的文本值
+				// String name = clientName.getText();
+				// String password = new String(pwd.getPassword());
+				// String struct = structCode.getText();
 				String verify = verifyCode.getText();
 				String name = "luojing";
 				String password = "Aa6328910";
 				String struct = "440700851401";
-				
-				login(struct,name,password,verify);
 
-
+				login(struct, name, password, verify);
 
 			}
 		});

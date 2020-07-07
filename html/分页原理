@@ -3,3 +3,9 @@
 一　向后分页请求时，会返回当前页客户清单表格的行数，如果客户名单表格的行数<=（每页的客户数－１）的话，
 　　即当前页的客户数不足，换句话说就是当前页的客户名单已不足一页，也即是没有更多的客户要分到下一页，也就是分页到了尽头
 　　每页的客户数为１１户，页面只显示１０户，当每页数为１０户及以下时，就可以认为没有下一页了。
+
+
+
+
+
+http://asone.safe:80/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken=bHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQxMTAxNzc1MDYqMTU5NDExMDE3NzUwNg==
