@@ -9,3 +9,9 @@
 
 
 http://asone.safe:80/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken=bHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQxMTAxNzc1MDYqMTU5NDExMDE3NzUwNg==
+
+
+
+http://asone.safe/BizforBankWeb/servlet/customerDetail?
+customerCode=05071153X
+&backUrl=%2fBizforBankWeb%2fservlet%2fcustomerSearch%3fcurrent_appCode%3dBZBO%26asone_addr%3dasone.safe%253A80%26userType%3d%26login_result_sign%3dlogin%26LTPAToken%3dbHVvamluZyo0NDA3MDA4NTE0MDEqJUMyJURFJUJFJUIyKjIqMDc1MC02MzI4OTEwKjE1OTQyODIxOTMwNjgqMTU5NDI4MjE5MzA2OA%253D%253D

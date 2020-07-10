@@ -31,6 +31,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import com.enixlin.utils.ExcelToolService;
 import com.enixlin.utils.NetService;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -39,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.JScrollPane;
+import javax.swing.DropMode;
 
 public class Main {
 
@@ -51,6 +53,8 @@ public class Main {
 	private CloseableHttpClient httpclient;
 	private NetService ns;
 	private JTextArea textArea;
+	private JButton fetch;
+	private String LTPAToken;
 
 	/**
 	 * Launch the application.
@@ -75,6 +79,10 @@ public class Main {
 		this.ns = new NetService();
 		initialize();
 		this.refreshVerifyImage();
+
+		// ArrayList<String> url_list=getClientDetailLinks();
+		// String table=getClientInformationTable(url_list.get(100));
+		System.out.println("");
 	}
 
 	/**
@@ -97,7 +105,9 @@ public class Main {
 		Map<String, String> postParams = new LinkedHashMap<>();
 		// 请求返回结果
 		String result = "";
-		String LTPAToken = "";
+
+		// 客户名单分页的总页数
+		int maxPage = 0;
 
 		// 对密码进行MD5加密,使用jdk里的scriptEngine类，运行md5.js里的hex_md5函数
 		ScriptEngineManager manager = new ScriptEngineManager();
@@ -162,46 +172,68 @@ public class Main {
 		Header[] headers = ns.getHeaders();
 		String str = headers[0].toString();
 		LTPAToken = str.substring(22, str.length());
-		System.out.println(LTPAToken);
+		// System.out.println(LTPAToken);
 
-		requestUrl = "http://asone.safe/asone/servlet/SSOServer?falseflag=ClientNotLogin&userCode=&orgCode=&orgType=&password=&task=doauthenticate&callbackUrl=http%3A%2F%2Fasone.safe%3A80%2FBizforBankWeb%2Fservlet%2FcustomerSearch%3Fcurrent_appCode%3DBZBO%26asone_addr%3Dasone.safe%253A80%26userType%3D";
-		result = ns.HttpGet(requestUrl);
-		CloseableHttpResponse response = ns.getResponse();
+		fetch.setEnabled(true);
+		
+		textArea.append("。。。");
+		textArea.append("用户登录成功。。。");
+		textArea.append("。。。");
 
-		int responseCode = response.getStatusLine().getStatusCode();
-		Header locationHeader = response.getFirstHeader("Location");
-		String location = locationHeader.getValue();
-		System.out.println(result);
+	}
 
-		String regex = "&LTPAToken=.*";
-		Pattern p = Pattern.compile(regex);
-		Matcher m = p.matcher(location);
-		while (m.find()) {
-			LTPAToken = m.group().substring(11, m.group().length());
-			System.out.println(LTPAToken);
+	/**
+	 * 取得整个单位基本情况表的html代码
+	 * 请求单位基本情况表时，系统会做两次自动中转，因此要取得两次的location 然后做两次get请求
+	 * （这里有一个注意点，请求具体客户的单位情况表时，有自动验证）
+	 * 
+	 * @author linzhenhuan </br>
+	 *         方法说明： </br>
+	 * @param url
+	 * @return String 创建时间：2020年7月9日
+	 */
+	public String getClientInformationTable(String url) {
+		String html = ns.HttpGet(url);
+		CloseableHttpResponse response1 = ns.getResponse();
 
-		}
-		// System.out.println(result);
+		int responseCode1 = response1.getStatusLine().getStatusCode();
+		Header locationHeader1 = response1.getFirstHeader("Location");
+		String location1 = locationHeader1.getValue();
 
-		// 请求单位基本情况表客户列表
-		requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken="
-				+ LTPAToken;
-		result = ns.HttpGet(requestUrl);
-		// System.out.println(result);
+		html = ns.HttpGet(location1);
+		CloseableHttpResponse response2 = ns.getResponse();
 
-		// 请求最后一页,先取得请求的链接
-		String lastPageAction = "";
-		String regex_lastPageAction = "<li .*;\">";
+		int responseCode2 = response2.getStatusLine().getStatusCode();
+		Header locationHeader2 = response2.getFirstHeader("Location");
+		String location2 = locationHeader2.getValue();
+
+		html = ns.HttpGet(location2);
+		System.out.println("html  " + html);
+		return html;
+	}
+
+	public int getMaxPage() {
+		// 请求最后一页,先取得请求的链接,然后从返回的html中提取最后一页的页码
+		int maxPage = 0;
+		String result = getNPage("0");
+		String regex_lastPageAction = "<li class=\"firstpage\"><input type=\"hidden\" name=\"curPageNum\" value=\"\">第.*页</li>";
 		Pattern p_page = Pattern.compile(regex_lastPageAction);
-		Matcher m_page = p_page.matcher(result);
-		while (m_page.find()) {
-			System.out.println(m_page.group());
-			lastPageAction = m_page.group().substring(39, 123);
-		}
-		System.out.println(lastPageAction);
+		Matcher m = p_page.matcher(result);
+		while (m.find()) {
 
-		requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch";
-		postParams.clear();
+			String pageNum = m.group().substring(m.group().indexOf("第") + 1, m.group().length() - 6);
+			maxPage = Integer.parseInt(pageNum.trim());
+		}
+		return maxPage;
+	}
+
+	// 取得第N页的客户清单
+	public String getNPage(String page_n) {
+		String html = "";
+		// 请求
+		String requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch";
+		// 请求参数
+		Map<String, String> postParams = new LinkedHashMap<>();
 		postParams.put("pageSize", "60000");
 		postParams.put("expPgNo", "0");
 		postParams.put("expCount", "0");
@@ -209,41 +241,123 @@ public class Main {
 		postParams.put("customerName", "");
 		postParams.put("dominationType", "1");
 		postParams.put("recsts", "9");
-		postParams.put("curPageNum", "0");
-		result = ns.HttpPost(requestUrl, postParams, "utf-8");
-		System.out.println(result);
-		
-		
-		ArrayList<String> links=getClientDetailLinks(result);
-		String host="http://asone.safe/";
-		System.out.println(links);
-
-		// 取得总页数
-		String s[] = result.split(">第.*页<");
-		System.out.println(s);
-
-		// pageSize=60000&expPgNo=0&expCount=0&customerCode=&customerName=&dominationType=1&recsts=9&curPageNum=0
-		// System.out.println(m_page.find());
-		// if(m_page.find()) {
-		// String lastPageAction=m.group();
-		// System.out.println(lastPageAction);
-		// }
-
-	}
-	
-	//取得第N页的客户清单
-	public String getNPage(int page_n) {
-		String html="";
+		postParams.put("curPageNum", page_n);
+		html = ns.HttpPost(requestUrl, postParams, "utf-8");
+		if (page_n == "0") {
+			System.out.println("取得列表的最后一页");
+		} else {
+			System.out.println("取得列表的第" + page_n + "页");
+		}
 		return html;
 	}
 
+	/**
+	 * 从html代码中提取客户单位基本情况表的各栏位信息，转换成LinkedHashMap
+	 * 
+	 * @author linzhenhuan </br>
+	 *         方法说明： </br>
+	 * @param html
+	 * @return LinkedHashMap<String,String> 创建时间：2020年7月9日
+	 */
+	public LinkedHashMap<String, String> getClientTableColumnDetail(String html) {
+		LinkedHashMap<String, String> table_cols = new LinkedHashMap<>();
+		ArrayList<String> rows = new ArrayList<>();
+		// 正则匹配所有文体框的栏位信息
+		String regex_input = "<input name=\".*/>";
+		Pattern p = Pattern.compile(regex_input);
+		Matcher m = p.matcher(html);
+		while (m.find()) {
+			String line=m.group();
+			String [] attrs=line.split(" ");
+			String att_name="";
+			String att_value="";
+			for(String attr : attrs) {
+				if(attr.matches("name=.*")) {
+					//将每一行的name属性提取出来
+					 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+				}
+				if(attr.matches("value=.*")) {
+					//将每一行的name属性提取出来
+					 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+				}
+			}
+			table_cols.put(att_name, att_value);
+		}
+		// 正则匹配所有单选框的栏位信息
+		String regex_radio = "<input type=\"radio\".*/>";
+		Pattern p_radio = Pattern.compile(regex_radio);
+		Matcher m_radio = p_radio.matcher(html);
+		while (m_radio.find()) {
+			String line=m_radio.group();
+			String [] attrs=line.split(" ");
+			String att_name="";
+			String att_value="";
+			for(String attr : attrs) {
+				if(attr.matches("name=.*")) {
+					//将每一行的name属性提取出来
+					 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+				}
+				if(attr.matches("value=.*")) {
+					//将每一行的name属性提取出来
+					 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+				}
+			}
+			table_cols.put(att_name, att_value);
+		}
+		
+		return table_cols;
+
+	}
+
 	// 从html代码中提取单个客户的单位基本情况表的链接
-	public ArrayList<String> getClientDetailLinks(String html) {
+	public ArrayList<String> getClientDetailLinks() {
 		ArrayList<String> links = new ArrayList<>();
-		Pattern p=Pattern.compile("<a href=\".*\">");
-		Matcher m=p.matcher(html);
-		while(m.find()) {
-			links.add(m.group().substring(9,m.group().length()-2));
+		String requestUrl = "http://asone.safe/asone/servlet/SSOServer?falseflag=ClientNotLogin&userCode=&orgCode=&orgType=&password=&task=doauthenticate&callbackUrl=http%3A%2F%2Fasone.safe%3A80%2FBizforBankWeb%2Fservlet%2FcustomerSearch%3Fcurrent_appCode%3DBZBO%26asone_addr%3Dasone.safe%253A80%26userType%3D";
+		String result = ns.HttpGet(requestUrl);
+		CloseableHttpResponse response = ns.getResponse();
+		int responseCode = response.getStatusLine().getStatusCode();
+		Header locationHeader = response.getFirstHeader("Location");
+		String location = locationHeader.getValue();
+		// System.out.println(result);
+
+		String regex = "&LTPAToken=.*";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(location);
+		while (m.find()) {
+			LTPAToken = m.group().substring(11, m.group().length());
+		}
+
+		// 请求单位基本情况表客户列表
+		requestUrl = "http://asone.safe/BizforBankWeb/servlet/customerSearch?current_appCode=BZBO&asone_addr=asone.safe%3A80&userType=&login_result_sign=login&LTPAToken="
+				+ LTPAToken;
+		result = ns.HttpGet(requestUrl);
+
+		//
+		int maxPage = getMaxPage();
+		textArea.append( "。。。。\n");
+		textArea.append( "。。。。\n");
+		textArea.append("一共要收集" + maxPage + "批的客户\n");
+		textArea.append( "。。。。\n");
+		textArea.append( "。。。。\n");
+	
+		for (int n = 1; n <= maxPage; n++) {
+			textArea.append("正在收集第" + n + "批的客户\n");
+			String html = getNPage(Integer.toString(n));
+			Pattern p1 = Pattern.compile("<a href=\".*\">");
+			Matcher m1 = p1.matcher(html);
+			int count = 0;
+			while (m1.find()) {
+				count++;
+				String url = "http://asone.safe" + m1.group().substring(9, m1.group().length() - 2);
+				// System.out.println(url);
+				if (url.equals("http://asone.safe#") || count == 11) {
+					// System.out.println("不可用链接");
+					// System.out.println(url);
+				} else {
+					links.add(url);
+				}
+			}
+
 		}
 		return links;
 	}
@@ -292,7 +406,6 @@ public class Main {
 				String name = "luojing";
 				String password = "Aa6328910";
 				String struct = "440700851401";
-
 				login(struct, name, password, verify);
 
 			}
@@ -309,10 +422,40 @@ public class Main {
 		frame.getContentPane().add(clientName);
 		clientName.setColumns(10);
 
-		JButton button = new JButton("\u6293\u53D6");
-		button.setEnabled(false);
-		button.setBounds(562, 449, 67, 23);
-		frame.getContentPane().add(button);
+		fetch = new JButton("\u6293\u53D6");
+		fetch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						ArrayList<String> links = getClientDetailLinks();
+						textArea.append("共有企业基本情况表:" + links.size() + "户\n");
+						
+						//取得客户的单位基本情况表
+						ArrayList<LinkedHashMap<String,String >> clients=new ArrayList<>();
+						int n=1;
+						for(String url :links) {
+							clients.add(getClientTableColumnDetail(getClientInformationTable(url)));
+							textArea.append("正在下载第"+n+"家企业情况表，共有"+links.size()+"家企业\n");
+							n++;
+						}
+						
+//						clients.add(getClientTableColumnDetail(getClientInformationTable(links.get(50))));
+						ExcelToolService nts=new ExcelToolService();
+						nts.exportToexcel(clients, "client.xls", "", "", "", "客户基本情况表");
+						System.out.println("");
+						
+						
+					}
+				}).start();
+				;
+
+			}
+		});
+		fetch.setEnabled(false);
+		fetch.setBounds(562, 449, 67, 23);
+		frame.getContentPane().add(fetch);
 
 		JButton button_1 = new JButton("\u5BFC\u51FA\u6570\u636E");
 		button_1.setEnabled(false);
@@ -375,6 +518,7 @@ public class Main {
 		frame.getContentPane().add(scrollPane);
 
 		textArea = new JTextArea();
+		textArea.setDropMode(DropMode.INSERT);
 		scrollPane.setViewportView(textArea);
 
 		image_verify = new JLabel();
