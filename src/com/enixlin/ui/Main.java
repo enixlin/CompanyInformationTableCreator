@@ -208,7 +208,7 @@ public class Main {
 		String location2 = locationHeader2.getValue();
 
 		html = ns.HttpGet(location2);
-		System.out.println("html  " + html);
+//		System.out.println("html  " + html);
 		return html;
 	}
 
@@ -271,14 +271,20 @@ public class Main {
 			String [] attrs=line.split(" ");
 			String att_name="";
 			String att_value="";
+		
 			for(String attr : attrs) {
-				if(attr.matches("name=.*")) {
+				if(attr.matches("fieldTitle=.*")) {
 					//将每一行的name属性提取出来
-					 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+					 att_name=attr.substring(attr.indexOf("fieldTitle=")+12,attr.length()-1);
+				}else if(attr.matches("name=.*")) {
+					att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
 				}
 				if(attr.matches("value=.*")) {
-					//将每一行的name属性提取出来
-					 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+					//将每一行的name属性提取出来,要注意可能有两个value属性，其中前一个可能有值，如何解决？？？？？ 
+					 if(attr.substring(attr.indexOf("value=")+7,attr.length()-1).length()!=0) {
+						 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+					 }
+					
 				}
 			}
 			table_cols.put(att_name, att_value);
@@ -289,21 +295,68 @@ public class Main {
 		Matcher m_radio = p_radio.matcher(html);
 		while (m_radio.find()) {
 			String line=m_radio.group();
-			String [] attrs=line.split(" ");
-			String att_name="";
-			String att_value="";
-			for(String attr : attrs) {
-				if(attr.matches("name=.*")) {
-					//将每一行的name属性提取出来
-					 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+			//如果当前行包括有checked　属性
+			if(line.indexOf("checked")!=-1) {
+				String [] attrs=line.split(" ");
+				String att_name="";
+				String att_value="";
+				
+				for(String attr : attrs) {					
+					if(attr.matches("name=.*")) {
+						//将每一行的name属性提取出来
+						 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+					}
+					if(attr.matches("value=.*")) {
+						//将每一行的name属性提取出来
+						 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+					}
 				}
-				if(attr.matches("value=.*")) {
-					//将每一行的name属性提取出来
-					 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
-				}
+				table_cols.put(att_name, att_value);
 			}
-			table_cols.put(att_name, att_value);
+			
 		}
+		
+		
+		
+		//取得联系统人，电话，
+		String regex_contract = "<td><div align=\"center\">.*</td>";
+		Pattern p_contract = Pattern.compile(regex_contract);
+		Matcher m_contract = p_contract.matcher(html);
+		int line_number=0;
+		while(m_contract.find()) {
+			
+			String line=m_contract.group();
+			if(line_number==1) {
+				String att_name="bankcode";
+				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+				table_cols.put(att_name, att_value);
+				
+			}
+			if(line_number==2) {
+				String att_name="contractor";
+				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+				table_cols.put(att_name, att_value);
+				
+			}
+			if(line_number==3) {
+				String att_name="companyTelephone";
+				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+				table_cols.put(att_name, att_value);
+				
+			}
+			if(line_number==4) {
+				String att_name="companyFax";
+				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+				table_cols.put(att_name, att_value);
+			}
+			if(line_number==5) {
+				String att_name="modifyDate";
+				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+				table_cols.put(att_name, att_value);
+			}
+			line_number++;
+		}
+		
 		
 		return table_cols;
 
@@ -334,6 +387,7 @@ public class Main {
 
 		//
 		int maxPage = getMaxPage();
+//		int maxPage = 1;
 		textArea.append( "。。。。\n");
 		textArea.append( "。。。。\n");
 		textArea.append("一共要收集" + maxPage + "批的客户\n");
@@ -399,13 +453,13 @@ public class Main {
 			// 登录
 			public void actionPerformed(ActionEvent e) {
 				// 取得各个输入框中的文本值
-				// String name = clientName.getText();
-				// String password = new String(pwd.getPassword());
-				// String struct = structCode.getText();
-				String verify = verifyCode.getText();
-				String name = "luojing";
-				String password = "Aa6328910";
-				String struct = "440700851401";
+				 String name = clientName.getText();
+				 String password = new String(pwd.getPassword());
+				 String struct = structCode.getText();
+				 String verify = verifyCode.getText();
+//				String name = "luojing";
+//				String password = "CIci8287";
+//				String struct = "440700851401";
 				login(struct, name, password, verify);
 
 			}
