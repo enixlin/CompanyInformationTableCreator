@@ -1,4 +1,3 @@
-
 package com.enixlin.ui;
 
 import java.awt.EventQueue;
@@ -6,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -39,6 +39,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+
 import javax.swing.JScrollPane;
 import javax.swing.DropMode;
 
@@ -55,6 +57,8 @@ public class Main {
 	private JTextArea textArea;
 	private JButton fetch;
 	private String LTPAToken;
+	private JLabel lblNewLabel;
+	private JProgressBar progressBar;
 
 	/**
 	 * Launch the application.
@@ -169,22 +173,31 @@ public class Main {
 		postParams.put("loginType", "");
 		postParams.put("biztype", "null");
 		result = ns.HttpPost(requestUrl, postParams, "utf-8");
+
+		System.out.println(postParams);
+		System.out.println(result);
 		Header[] headers = ns.getHeaders();
 		String str = headers[0].toString();
 		LTPAToken = str.substring(22, str.length());
 		// System.out.println(LTPAToken);
 
-		fetch.setEnabled(true);
+	
 		
-		textArea.append("。。。");
-		textArea.append("用户登录成功。。。");
-		textArea.append("。。。");
+		if (!result.contains("// 重新获取验证码")) {
+			textArea.append("。。。");
+			textArea.append("用户登录成功。。。");
+			textArea.append("。。。\n");
+			fetch.setEnabled(true);
+		} else {
+			textArea.append("。。。");
+			textArea.append("登录信息有误！！请检查【用户名】【密码】【机构号】【验证码】后重新登录。。。");
+			textArea.append("。。。\n");
+		}
 
 	}
 
 	/**
-	 * 取得整个单位基本情况表的html代码
-	 * 请求单位基本情况表时，系统会做两次自动中转，因此要取得两次的location 然后做两次get请求
+	 * 取得整个单位基本情况表的html代码 请求单位基本情况表时，系统会做两次自动中转，因此要取得两次的location 然后做两次get请求
 	 * （这里有一个注意点，请求具体客户的单位情况表时，有自动验证）
 	 * 
 	 * @author linzhenhuan </br>
@@ -208,7 +221,7 @@ public class Main {
 		String location2 = locationHeader2.getValue();
 
 		html = ns.HttpGet(location2);
-//		System.out.println("html  " + html);
+		// System.out.println("html " + html);
 		return html;
 	}
 
@@ -243,11 +256,12 @@ public class Main {
 		postParams.put("recsts", "9");
 		postParams.put("curPageNum", page_n);
 		html = ns.HttpPost(requestUrl, postParams, "utf-8");
-		if (page_n == "0") {
-			System.out.println("取得列表的最后一页");
-		} else {
-			System.out.println("取得列表的第" + page_n + "页");
-		}
+//		if (page_n == "0") {
+//			System.out.println("取得列表的最后一页");
+//		} else {
+//			System.out.println("取得列表的第" + page_n + "页");
+//		}
+	
 		return html;
 	}
 
@@ -267,24 +281,24 @@ public class Main {
 		Pattern p = Pattern.compile(regex_input);
 		Matcher m = p.matcher(html);
 		while (m.find()) {
-			String line=m.group();
-			String [] attrs=line.split(" ");
-			String att_name="";
-			String att_value="";
-		
-			for(String attr : attrs) {
-				if(attr.matches("fieldTitle=.*")) {
-					//将每一行的name属性提取出来
-					 att_name=attr.substring(attr.indexOf("fieldTitle=")+12,attr.length()-1);
-				}else if(attr.matches("name=.*")) {
-					att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+			String line = m.group();
+			String[] attrs = line.split(" ");
+			String att_name = "";
+			String att_value = "";
+
+			for (String attr : attrs) {
+				if (attr.matches("fieldTitle=.*")) {
+					// 将每一行的name属性提取出来
+					att_name = attr.substring(attr.indexOf("fieldTitle=") + 12, attr.length() - 1);
+				} else if (attr.matches("name=.*")) {
+					att_name = attr.substring(attr.indexOf("name=") + 6, attr.length() - 1);
 				}
-				if(attr.matches("value=.*")) {
-					//将每一行的name属性提取出来,要注意可能有两个value属性，其中前一个可能有值，如何解决？？？？？ 
-					 if(attr.substring(attr.indexOf("value=")+7,attr.length()-1).length()!=0) {
-						 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
-					 }
-					
+				if (attr.matches("value=.*")) {
+					// 将每一行的name属性提取出来,要注意可能有两个value属性，其中前一个可能有值，如何解决？？？？？
+					if (attr.substring(attr.indexOf("value=") + 7, attr.length() - 1).length() != 0) {
+						att_value = attr.substring(attr.indexOf("value=") + 7, attr.length() - 1);
+					}
+
 				}
 			}
 			table_cols.put(att_name, att_value);
@@ -294,70 +308,67 @@ public class Main {
 		Pattern p_radio = Pattern.compile(regex_radio);
 		Matcher m_radio = p_radio.matcher(html);
 		while (m_radio.find()) {
-			String line=m_radio.group();
-			//如果当前行包括有checked　属性
-			if(line.indexOf("checked")!=-1) {
-				String [] attrs=line.split(" ");
-				String att_name="";
-				String att_value="";
-				
-				for(String attr : attrs) {					
-					if(attr.matches("name=.*")) {
-						//将每一行的name属性提取出来
-						 att_name=attr.substring(attr.indexOf("name=")+6,attr.length()-1);
+			String line = m_radio.group();
+			// 如果当前行包括有checked 属性
+			if (line.indexOf("checked") != -1) {
+				String[] attrs = line.split(" ");
+				String att_name = "";
+				String att_value = "";
+
+				for (String attr : attrs) {
+					if (attr.matches("name=.*")) {
+						// 将每一行的name属性提取出来
+						att_name = attr.substring(attr.indexOf("name=") + 6, attr.length() - 1);
 					}
-					if(attr.matches("value=.*")) {
-						//将每一行的name属性提取出来
-						 att_value=attr.substring(attr.indexOf("value=")+7,attr.length()-1);
+					if (attr.matches("value=.*")) {
+						// 将每一行的name属性提取出来
+						att_value = attr.substring(attr.indexOf("value=") + 7, attr.length() - 1);
 					}
 				}
 				table_cols.put(att_name, att_value);
 			}
-			
+
 		}
-		
-		
-		
-		//取得联系统人，电话，
+
+		// 取得联系统人，电话，
 		String regex_contract = "<td><div align=\"center\">.*</td>";
 		Pattern p_contract = Pattern.compile(regex_contract);
 		Matcher m_contract = p_contract.matcher(html);
-		int line_number=0;
-		while(m_contract.find()) {
-			
-			String line=m_contract.group();
-			if(line_number==1) {
-				String att_name="bankcode";
-				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+		int line_number = 0;
+		while (m_contract.find()) {
+
+			String line = m_contract.group();
+			if (line_number == 1) {
+				String att_name = "bankcode";
+				String att_value = line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
 				table_cols.put(att_name, att_value);
-				
+
 			}
-			if(line_number==2) {
-				String att_name="contractor";
-				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+			if (line_number == 2) {
+				String att_name = "contractor";
+				String att_value = line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
 				table_cols.put(att_name, att_value);
-				
+
 			}
-			if(line_number==3) {
-				String att_name="companyTelephone";
-				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+			if (line_number == 3) {
+				String att_name = "companyTelephone";
+				String att_value = line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
 				table_cols.put(att_name, att_value);
-				
+
 			}
-			if(line_number==4) {
-				String att_name="companyFax";
-				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+			if (line_number == 4) {
+				String att_name = "companyFax";
+				String att_value = line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
 				table_cols.put(att_name, att_value);
 			}
-			if(line_number==5) {
-				String att_name="modifyDate";
-				String att_value=line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
+			if (line_number == 5) {
+				String att_name = "modifyDate";
+				String att_value = line.replace("<td><div align=\"center\">", "").replace("</div></td>", "");
 				table_cols.put(att_name, att_value);
 			}
 			line_number++;
 		}
-		
-		
+
 		return table_cols;
 
 	}
@@ -387,15 +398,15 @@ public class Main {
 
 		//
 		int maxPage = getMaxPage();
-//		int maxPage = 1;
-		textArea.append( "。。。。\n");
-		textArea.append( "。。。。\n");
-		textArea.append("一共要收集" + maxPage + "批的客户\n");
-		textArea.append( "。。。。\n");
-		textArea.append( "。。。。\n");
-	
+		// int maxPage = 1;
+//		textArea.append("。。。。\n");
+//		textArea.append("。。。。\n");
+//		textArea.append("一共要收集" + maxPage + "批的客户\n");
+//		textArea.append("。。。。\n");
+//		textArea.append("。。。。\n");
+
 		for (int n = 1; n <= maxPage; n++) {
-			textArea.append("正在收集第" + n + "批的客户\n");
+//			textArea.append("正在收集第" + n + "批的客户\n");
 			String html = getNPage(Integer.toString(n));
 			Pattern p1 = Pattern.compile("<a href=\".*\">");
 			Matcher m1 = p1.matcher(html);
@@ -445,7 +456,7 @@ public class Main {
 		frame = new JFrame();
 		frame.setFont(new Font("Arial", Font.PLAIN, 12));
 		frame.setTitle("\u5355\u4F4D\u57FA\u672C\u60C5\u51B5\u8868\u4E0B\u8F7D\u5668");
-		frame.setBounds(100, 100, 771, 518);
+		frame.setBounds(100, 100, 792, 555);
 		frame.getContentPane().setLayout(null);
 
 		JButton btnNewButton = new JButton("\u767B\u5F55");
@@ -453,13 +464,13 @@ public class Main {
 			// 登录
 			public void actionPerformed(ActionEvent e) {
 				// 取得各个输入框中的文本值
-				 String name = clientName.getText();
-				 String password = new String(pwd.getPassword());
-				 String struct = structCode.getText();
-				 String verify = verifyCode.getText();
-//				String name = "luojing";
-//				String password = "CIci8287";
-//				String struct = "440700851401";
+				String name = clientName.getText();
+				String password = new String(pwd.getPassword());
+				String struct = structCode.getText();
+				String verify = verifyCode.getText();
+				// String name = "luojing";
+				// String password = "CIci8287";
+				// String struct = "440700851401";
 				login(struct, name, password, verify);
 
 			}
@@ -476,31 +487,49 @@ public class Main {
 		frame.getContentPane().add(clientName);
 		clientName.setColumns(10);
 
-		fetch = new JButton("\u6293\u53D6");
+		fetch = new JButton("下载");
 		fetch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
+						textArea.append("查询单位基本情况表总数:请稍候。。。\n");
+						fetch.setEnabled(false);
 						ArrayList<String> links = getClientDetailLinks();
-						textArea.append("共有企业基本情况表:" + links.size() + "户\n");
-						
-						//取得客户的单位基本情况表
-						ArrayList<LinkedHashMap<String,String >> clients=new ArrayList<>();
-						int n=1;
-						for(String url :links) {
-							clients.add(getClientTableColumnDetail(getClientInformationTable(url)));
-							textArea.append("正在下载第"+n+"家企业情况表，共有"+links.size()+"家企业\n");
-							n++;
+						if(links.size()==0) {
+							textArea.append("查询有误，请【点击验证码图片】【重填验证码】，点击【登录】后再下载");
+						}else {
+							textArea.append("共有企业基本情况表:" + links.size() + "户\n");
+							textArea.append("开始下载:");
+
+							// 取得客户的单位基本情况表
+							ArrayList<LinkedHashMap<String, String>> clients = new ArrayList<>();
+							int n = 1;
+							for (String url : links) {
+								clients.add(getClientTableColumnDetail(getClientInformationTable(url)));
+
+//								textArea.append("正在下载第" + n + "家企业情况表，共有" + links.size() + "家企业\n");
+								lblNewLabel.setText(n + "/" + links.size());
+								progressBar.setMaximum(links.size());
+								progressBar.setValue(n);
+
+								n++;
+							}
+							textArea.append("下载企业情况表完成\n");
+							// clients.add(getClientTableColumnDetail(getClientInformationTable(links.get(50))));
+							ExcelToolService nts = new ExcelToolService();
+
+							nts.exportToexcel(clients, "client.xls", "", "", "", "客户基本情况表");
+							textArea.append("企业情况表保存完成\n");
+							fetch.setEnabled(true);
+							System.out.println("");
+							
+							
 						}
 						
-//						clients.add(getClientTableColumnDetail(getClientInformationTable(links.get(50))));
-						ExcelToolService nts=new ExcelToolService();
-						nts.exportToexcel(clients, "client.xls", "", "", "", "客户基本情况表");
-						System.out.println("");
-						
-						
+					
+
 					}
 				}).start();
 				;
@@ -508,24 +537,19 @@ public class Main {
 			}
 		});
 		fetch.setEnabled(false);
-		fetch.setBounds(562, 449, 67, 23);
+		fetch.setBounds(562, 449, 138, 35);
 		frame.getContentPane().add(fetch);
-
-		JButton button_1 = new JButton("\u5BFC\u51FA\u6570\u636E");
-		button_1.setEnabled(false);
-		button_1.setBounds(664, 450, 84, 23);
-		frame.getContentPane().add(button_1);
 
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setBounds(9, 436, 730, 4);
 		frame.getContentPane().add(separator_1);
 
-		JProgressBar progressBar = new JProgressBar();
-		progressBar.setBounds(21, 449, 398, 19);
+		progressBar = new JProgressBar();
+		progressBar.setBounds(21, 449, 269, 19);
 		frame.getContentPane().add(progressBar);
 
-		JLabel lblNewLabel = new JLabel("New label");
-		lblNewLabel.setBounds(457, 449, 53, 18);
+		lblNewLabel = new JLabel("下载进度");
+		lblNewLabel.setBounds(323, 449, 187, 18);
 		frame.getContentPane().add(lblNewLabel);
 
 		JLabel lblNewLabel_1 = new JLabel("\u7528\u6237\u540D");
